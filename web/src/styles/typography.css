@@ -1,0 +1,7 @@
+:root {
+  @apply text-[14px];
+}
+
+h1 {
+  @apply font-bold text-[36px];
+}
