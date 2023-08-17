@@ -1,5 +1,8 @@
 import uuid
+from typing import List, Tuple
+
 from django.db import models
+from enum import Enum
 
 
 class Port(models.Model):
@@ -42,6 +45,17 @@ class Voyage(models.Model):
     def __str__(self):
         return self.voyage_no
 
+    def to_data(self):
+        return {
+            "voyage_no": self.voyage_no,
+            "start": self.start.to_data(),
+            "destination": self.destination.to_data(),
+            "departure_time": self.departure_time,
+            "arrival_time": self.arrival_time,
+            "min_ticket_price": self.min_ticket_price,
+            "service_provider": self.service_provider.to_data(),
+        }
+
 
 class Seat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -49,6 +63,23 @@ class Seat(models.Model):
     seat_no = models.IntegerField()
     price = models.IntegerField()
     available = models.BooleanField(default=True)
+    seat_class = models.CharField(max_length=100) # SeatClass Enum
 
     def __str__(self):
         return str(self.seat_no)
+
+    def to_data(self):
+        return {
+            "id": str(self.id),
+            "voyage": self.voyage.voyage_no,
+            "seat_no": self.seat_no,
+            "price": self.price,
+            "available": self.available,
+            "seat_class": self.seat_class,
+        }
+
+
+class SeatClass(Enum):
+    ECONOMY = "ECONOMY"
+    BUSINESS = "BUSINESS"
+    FIRST = "FIRST"
