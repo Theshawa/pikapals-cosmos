@@ -56,6 +56,11 @@ class Voyage(models.Model):
             "service_provider": self.service_provider.to_data(),
         }
 
+    def create_seats(self, seats: List[Tuple['SeatClass', int, int]]):
+        for (index, seat) in enumerate(seats):
+            Seat(voyage=self, seat_class=seat[0], seat_no=seat[1], price=seat[2], available=True).save()
+        self.save()
+
 
 class Seat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
