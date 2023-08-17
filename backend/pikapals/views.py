@@ -43,6 +43,10 @@ def _port_get(request: HttpRequest) -> HttpResponse:
         data = {"is_success": True, "data": [port.to_data() for port in ports]}
         return HttpResponse(json.dumps(data))
 
+    try:
+        port = Port.objects.get(id=get_data["id"])
+    except Port.DoesNotExist:
+        return HttpResponseNotFound()
 
     data = {"is_success": True, "data": port.to_data()}
     return HttpResponse(json.dumps(data))
