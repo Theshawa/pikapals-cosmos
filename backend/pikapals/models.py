@@ -23,6 +23,12 @@ class ServiceProvider(models.Model):
     def __str__(self):
         return self.name
 
+    def to_data(self):
+        return {
+            "id": str(self.id),
+            "name": self.name
+        }
+
 
 class Voyage(models.Model):
     voyage_no = models.CharField(max_length=100, primary_key=True)
