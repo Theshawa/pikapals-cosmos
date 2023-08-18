@@ -2,9 +2,9 @@ import json
 from typing import List, Tuple
 
 from django.core.exceptions import BadRequest
-from django.http import HttpResponse, HttpRequest, HttpResponseNotFound
+from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
-from pikapals.models import Port, ServiceProvider, Voyage
+from pikapals.models import Port, ServiceProvider, Voyage, Seat
 
 
 def index(_):
@@ -171,4 +171,35 @@ def _voyage_create(request: HttpRequest):
         return HttpResponse(json.dumps(data))
 
     except ServiceProvider.DoesNotExist or Port.DoesNotExist:
+        return HttpResponseNotFound()
+
+
+@csrf_exempt
+def book_seat_endpoint(request: HttpRequest) -> HttpResponse:
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+
+    if "voyage_no" not in request.POST.keys():
+        raise BadRequest("voyage_no is required")
+    if "seat_id" not in request.POST.keys():
+        raise BadRequest("seat_id is required")
+
+    voyage_no = request.POST["voyage_no"]
+    seat_id = request.POST["seat_id"]
+
+    try:
+        voyage = Voyage.objects.get(voyage_no=voyage_no)
+        seat = Seat.objects.get(id=seat_id)
+
+        if seat.voyage != voyage:
+            data = {"is_success": False, "error": "Seat does not belong to voyage"}
+            return HttpResponse(json.dumps(data))
+        if not seat.available:
+            data = {"is_success": False, "error": "Seat is not available"}
+            return HttpResponse(json.dumps(data))
+        seat.available = False
+        seat.save()
+        data = {"is_success": True}
+        return HttpResponse(json.dumps(data))
+    except Voyage.DoesNotExist or Seat.DoesNotExist:
         return HttpResponseNotFound()
