@@ -1,8 +1,11 @@
 import uuid
 from typing import List, Tuple
 
+from django.contrib.auth.models import User
 from django.db import models
 from enum import Enum
+
+from django.db.models import ForeignKey
 
 
 class Port(models.Model):
@@ -69,6 +72,7 @@ class Seat(models.Model):
     price = models.IntegerField()
     available = models.BooleanField(default=True)
     seat_class = models.CharField(max_length=100) # SeatClass Enum
+    booked_by = ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="booked_seats")
 
     def __str__(self):
         return str(self.seat_no)

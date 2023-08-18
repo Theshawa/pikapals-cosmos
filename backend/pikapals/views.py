@@ -2,7 +2,7 @@ import json
 from typing import List, Tuple
 
 from django.core.exceptions import BadRequest
-from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpRequest, HttpResponseNotFound, HttpResponseNotAllowed, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from pikapals.models import Port, ServiceProvider, Voyage, Seat
 
@@ -179,6 +179,9 @@ def book_seat_endpoint(request: HttpRequest) -> HttpResponse:
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
 
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+
     if "voyage_no" not in request.POST.keys():
         raise BadRequest("voyage_no is required")
     if "seat_id" not in request.POST.keys():
@@ -198,6 +201,7 @@ def book_seat_endpoint(request: HttpRequest) -> HttpResponse:
             data = {"is_success": False, "error": "Seat is not available"}
             return HttpResponse(json.dumps(data))
         seat.available = False
+        seat.booked_by = request.user
         seat.save()
         data = {"is_success": True}
         return HttpResponse(json.dumps(data))
