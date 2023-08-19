@@ -71,7 +71,7 @@ class Seat(models.Model):
     seat_no = models.IntegerField()
     price = models.IntegerField()
     available = models.BooleanField(default=True)
-    seat_class = models.CharField(max_length=100) # SeatClass Enum
+    seat_class = models.CharField(max_length=100)  # SeatClass Enum
     booked_by = ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="booked_seats")
 
     def __str__(self):
